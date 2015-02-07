@@ -7,7 +7,7 @@ from flask.ext.pymongo import PyMongo
 from config import MONGO_DBNAME, MONGO_PORT
 import json
 
-app = Flask(__name__)
+app = Flask('dfkm')
 mongo = PyMongo(app, config_prefix='MONGO')
 
 app.debug = True
@@ -92,14 +92,11 @@ def create_zone():
 
     # Now push to mongo
     zone_id = mongo.db.zones.insert(zone)
-    if len(str(zone_id)) == 32:
-        response = {'zone_id' : str(zone_id) }
 
-    res = mongo.db.zones.find()
-    for x in res:
-        print x
+    if len(str(zone_id)) == 24:
+        response = {'zone_id' : str(zone_id) }
         
-    return jsonify({'zone_id': str(zone_id)}), 201
+    return jsonify(response), 201
 
 
 if __name__ == '__main__':
