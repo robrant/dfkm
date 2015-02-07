@@ -30,12 +30,10 @@ def getzones():
         print data
         #Check if data is null - get all zones
         if data:
-            rec = mongo.db.zones.find({'zone_name':data})
+            rec = mongo.dfkm.zones.find({'zone_name':data})
         else:
-            rec = mongo.db.zones.find()
+            rec = mongo.dfkm.zones.find()
         return jsonify(rec)
-
-
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])
@@ -55,8 +53,8 @@ def create_zone():
     }
 
     # Now push to mongo
-    
-    
+
+
     #return jsonify({'zone_id': zone_id}), 201
 
 
