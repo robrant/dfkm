@@ -23,10 +23,15 @@ def create_zone():
     
     if not request.json:
         abort(400)
+    else:
+        loc = request.json['loc']
+        loc_type = request.json['loc_type']
+        
     zone = {
             'zone_name': request.json['zone_name'],
             'description': request.json.get('description', ""),
-            'loc' : {''}
+            'loc' : loc,
+            #'risk' : PLACEHOLDER FOR GETTING THE RISK SCORE
     }
     
     # Now push to mongo
