@@ -1,13 +1,7 @@
 
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
-
-app.config.update(
-    MONGODB_HOST = 'localhost',
-    MONGODB_PORT = '27017',
-    MONGODB_DB = 'dfkm',
-)
 
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
@@ -17,7 +11,7 @@ app.config['SECRET_KEY'] = 'secret!'
 @app.route('/')
 def index():
     """ normal http request to a serve up the page """  
-    return render_template('index.html')
+    return jsonify({"hello":"world"})
 
 
 if __name__ == '__main__':
