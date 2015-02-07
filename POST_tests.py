@@ -23,5 +23,9 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.get('/')
         print response
 
+    def test_POST_simple_point(self):
+        response = self.app.get('/')
+        print response
+
 if __name__ == '__main__':
     unittest.main()

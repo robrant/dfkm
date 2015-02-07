@@ -24,21 +24,21 @@ def index():
 
 
 
-@app.route('/api/v1.0/getzones')
+@app.route('/api/v1.0/getzones', methods=['GET'])
 def getzones():
     """ Grabbing and returning the zones """
-    data = request.args.get('zid', None)
-    print data
-    rec = mongo.db.people.update({'name':d['name']},
-                                  {'$set': { 'Vis':int(data[0]),
-                                            'Stats':int(data[1]),
-                                            'Coding':int(data[2]),
-                                            'Comms':int(data[3]),
-                                            'Domain Exp':int(data[4])}})
 
-
-
-    return render_template('index.html')
+    if not request.json:
+        abort(400)
+    else:
+        data = request.args.get('zone_name', None)
+        print data
+        #Check if data is null - get all zones
+        if data:
+            rec = mongo.dfkm.zones.find({'zone_name':data})
+        else:
+            rec = mongo.dfkm.zones.find()
+        return jsonify(rec)
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])
@@ -60,7 +60,6 @@ def create_zone():
 
     # Now push to mongo
     zone_id = mongo.db.zones.insert(zone)
-    print zone_id
     #return jsonify({'zone_id': zone_id}), 201
 
 
