@@ -31,7 +31,6 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_index_call(self):
         response = self.app.get('/')
-        print response
 
     def test_POST_simple_point(self):
         
@@ -68,10 +67,93 @@ class FlaskrTestCase(unittest.TestCase):
         db = client[self.name]
         coll = db['zones']
         assert coll.count() == 1
+    
+    def test_user_enter(self):
+        """ Checks that user enter adds to the db correctly """
+        
+        # Horrid hack to generate a zone
+        data = {'zone_name' : 'test zone polygon',
+                'description' : 'new dangerous polygon zone',
+                'loc' : {'type' : 'Polygon',
+                         'coordinates': [ [ [ 0 , 0 ] , [ 3 , 6 ] , [ 6 , 1 ] , [ 0 , 0  ] ] ]}}
+        res = self.app.post('/api/v1.0/zones', data=json.dumps(data), content_type='application/json')
+        zone_id = json.loads(res.data)['zone_id']
+        
+        # Hit the API and get back a user who entered        
+        url = '/api/v1.0/enter/%s' %(zone_id)
+        get_res = self.app.get(url)
+        user_id = json.loads(get_res.data)['user_id']
 
-        res = coll.find()
-        print res
+        assert len(user_id) == 24
 
+        # Check it's in the db too
+        db = client[self.name]
+        coll = db['users']
+        assert coll.count() == 1
+        
+        
+    def test_user_exit(self):
+        """ Checks that user gets deleted from the db when exiting """
+        
+        # Horrid hack to generate a zone
+        data = {'zone_name' : 'test zone polygon',
+                'description' : 'new dangerous polygon zone',
+                'loc' : {'type' : 'Polygon',
+                         'coordinates': [ [ [ 0 , 0 ] , [ 3 , 6 ] , [ 6 , 1 ] , [ 0 , 0  ] ] ]}}
+        res = self.app.post('/api/v1.0/zones', data=json.dumps(data), content_type='application/json')
+        zone_id = json.loads(res.data)['zone_id']
+        
+        # Hit the API and get back a user who entered        
+        url = '/api/v1.0/enter/%s' %(zone_id)
+        get_res = self.app.get(url)
+        user_id = json.loads(get_res.data)['user_id']
+
+        # Hit the API and get back a user who entered        
+        url = '/api/v1.0/exit/%s/%s' %(str(zone_id), str(user_id))
+        get_res = self.app.get(url)
+        
+        # Now check that the db doens't contain the user
+        db = client[self.name]
+        coll = db['users']
+        docs = coll.find()
+        
+        assert docs[0]['active'] == False
+        
+    def test_GET_user_count_for_zone(self):
+        """ Gets the number of users in a zone"""
+        
+        # Horrid hack to generate a zone
+        data = {'zone_name' : 'test zone polygon',
+                'description' : 'new dangerous polygon zone',
+                'loc' : {'type' : 'Polygon',
+                         'coordinates': [ [ [ 0 , 0 ] , [ 3 , 6 ] , [ 6 , 1 ] , [ 0 , 0  ] ] ]}}
+        res = self.app.post('/api/v1.0/zones', data=json.dumps(data), content_type='application/json')
+        zone_id = json.loads(res.data)['zone_id']
+        
+        for i in range(10):
+        
+            # Hit the API and get back a user who entered        
+            url = '/api/v1.0/enter/%s' %(zone_id)
+            get_res = self.app.get(url)
+            user_id = json.loads(get_res.data)['user_id']
+    
+            # Hit the API and get back a user who entered        
+            if i % 2 == 0:
+                url = '/api/v1.0/exit/%s/%s' %(str(zone_id), str(user_id))
+                get_res = self.app.get(url)
+        
+        # Now check that the db doens't contain the user
+        db = client[self.name]
+        coll = db['users']
+        docs = coll.find()
+        
+        assert coll.count() == 10
+        
+        # Get the count from the API
+        url = '/api/v1.0/user_count/%s' %(zone_id)
+        count_response = self.app.get(url)
+        
+        assert json.loads(count_response.data)['user_count'] == 5
 
     def test_GET_simple_point(self):
         
@@ -89,8 +171,7 @@ class FlaskrTestCase(unittest.TestCase):
                              content_type='application/json')
         
         response = self.app.get('/api/v1.0/getzones')
-        for x in response:
-            print x
         
+                
 if __name__ == '__main__':
     unittest.main()

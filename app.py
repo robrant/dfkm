@@ -3,7 +3,11 @@ from flask import Flask, render_template, jsonify, request, Response
 from flask import abort
 from flask import Response
 from pymongo import GEOSPHERE
+import bson
 import json
+import datetime
+from pymongo import MongoClient
+client = MongoClient()
 
 from flask.ext.pymongo import PyMongo
 from config import MONGO_DBNAME, MONGO_PORT
@@ -134,6 +138,50 @@ def create_zone():
 
     return jsonify(response), 201
 
+
+
+@app.route('/api/v1.0/user_count/<string:zone_id>', methods=['GET'])
+def users_in_zone(zone_id):
+    """ Number of users in a zone """
+    
+    # Create a fake user id
+    user_id = str(bson.objectid.ObjectId())
+    doc = {'zone_id': str(zone_id),
+           'active' : True}
+    
+    number_users = mongo.db.users.find(doc).count()
+    
+    response = {'zone_id' : str(zone_id),
+                'user_count' : number_users }
+    
+    return jsonify(response), 201
+
+@app.route('/api/v1.0/enter/<string:zone_id>', methods=['GET'])
+def user_enter(zone_id):
+    """ User enters a zone """
+    
+    # Create a fake user id
+    user_id = str(bson.objectid.ObjectId())
+    
+    doc = {'zone_id' : zone_id,
+           'user_id' : user_id,
+           'ts' : datetime.datetime.utcnow(),
+           'active' : True }
+    
+    res = mongo.db.users.insert(doc)
+    response = {'user_id':str(user_id)}
+
+    return jsonify(response), 201
+
+
+@app.route('/api/v1.0/exit/<string:zone_id>/<string:user_id>', methods=['GET'])
+def user_exit(zone_id, user_id):
+    """ User leaves a zone """
+
+    res = mongo.db.users.update({'zone_id' : str(zone_id), 'user_id' : str(user_id) },
+                                {'$set' : {'active' : False }})
+    
+    return jsonify({'updated': True}), 201
 
 if __name__ == '__main__':
     """
