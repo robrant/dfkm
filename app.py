@@ -2,6 +2,7 @@
 from flask import Flask, render_template, jsonify, request
 from flask import abort
 from flask import Response
+from pymongo import GEOSPHERE
 
 from flask.ext.pymongo import PyMongo
 from config import MONGO_DBNAME, MONGO_PORT
@@ -13,11 +14,15 @@ mongo = PyMongo(app, config_prefix='MONGO')
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
 
+
 # -----------------------------------------------------------------------------
 
 def init_db():
     """ Placeholder for initialising the database"""
-    
+
+    # Put a spatial index on the loc field
+    with app.app_context():
+        mongo.db.zones.ensure_index( [("loc",GEOSPHERE)] )
 
 @app.route('/')
 def index():
@@ -62,6 +67,7 @@ def create_zone():
         except ValueError:
             return Response(status=405)
 
+    # GEO INPUT
     try:
         loc = content['loc']
         zone['loc'] = loc
@@ -69,8 +75,13 @@ def create_zone():
     except:
         return Response(status=405)
 
+    # HANDLE POINT DATA
     if loc['type'].lower() == 'point' and content.has_key('radius') == True:
         zone['radius'] = content['radius']
+    
+    # HANDLE POLYGON DATA
+    if loc['type'].lower() == 'polygon':
+        zone['loc'] = loc
     
     # Default on the risk score
     if content.has_key('risk') == True:
