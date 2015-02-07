@@ -2,7 +2,10 @@
 from flask import Flask, render_template, jsonify, request
 from flask import abort
 
+from flask.ext.pymongo import PyMongo
+
 app = Flask(__name__)
+mongo = PyMongo(app)
 
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
@@ -13,6 +16,7 @@ app.config['SECRET_KEY'] = 'secret!'
 def index():
     """ normal http request to a serve up the page """  
     return jsonify({"hello":"world"})
+
 
 @app.route('/api/v1.0/zones', methods=['POST'])
 def create_zone():
@@ -26,6 +30,7 @@ def create_zone():
     }
     
     # Now push to mongo
+    
     
     return jsonify({'zone_id': zone_id}), 201
 
