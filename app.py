@@ -190,7 +190,7 @@ def user_enter(zone_id):
     return jsonify(response), 201
 
 
-@app.route('/api/v1.0/exit/<string:zone_id>/<string:user_id>', methods=['GET'])
+@app.route('/api/v1.0/exit/<string:zone_id>/<int:user_id>', methods=['GET'])
 def user_exit(zone_id, user_id=None):
     """ User leaves a zone """
 
