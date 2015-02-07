@@ -1,0 +1,5 @@
+Flask
+mongoengine
+pymongo
+-e git://github.com/elasticsales/flask-mongoengine.git#egg=flask-mongoengine
+
