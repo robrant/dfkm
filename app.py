@@ -1,14 +1,8 @@
 
-from flask import Flask, render_template, request
-import json
+from flask import Flask, render_template, request, jsonify
+
 
 app = Flask(__name__)
-
-app.config.update(
-    MONGODB_HOST = 'localhost',
-    MONGODB_PORT = '27017',
-    MONGODB_DB = 'dfkm',
-)
 
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
@@ -28,6 +22,7 @@ def getzones():
     data = request.args.get('zid', None)
     print data
     return render_template('index.html')
+
 
 
 if __name__ == '__main__':
