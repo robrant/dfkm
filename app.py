@@ -30,17 +30,22 @@ def index():
 def getzones():
     """ Grabbing and returning the zones """
 
-    if not request.json:
-        abort(400)
+    data = request.args.get('zone_name', None)
+    print data
+    #Check if data is null - get all zones
+    out = []
+    if data:
+        rec = mongo.db.zones.find({'zone_name':data})
     else:
-        data = request.args.get('zone_name', None)
-        print data
-        #Check if data is null - get all zones
-        if data:
-            rec = mongo.dfkm.zones.find({'zone_name':data})
-        else:
-            rec = mongo.dfkm.zones.find()
-        return jsonify(rec)
+        rec = mongo.db.zones.find()
+
+    for r in rec:
+        print 'found something'
+        out.append(r)
+
+    print "here"
+
+    return jsonify(out)
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])

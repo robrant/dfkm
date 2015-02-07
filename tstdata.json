@@ -1,4 +1,4 @@
-[{"description":"zone 1", "radius":15.6, "risk":15, loc: { type: "Point", coordinates: [ 40, 5 ] }},
-{"description":"zone 2", "radius":15.6, "risk":10, loc: { type: "Point", coordinates: [ 41, 6 ] }},
-{"description":"zone 3", "radius":5.6, "risk":1, loc: { type: "Point", coordinates: [ 42, 7 ] }}
+[{"zone_name":"zone 1", "description":"a zone 1" , "radius":15.6, "risk":15, loc: { type: "Point", coordinates: [ 40, 5 ] }},
+{"zone_name":"zone 2", "description":"a zone 2" ,"radius":15.6, "risk":10, loc: { type: "Point", coordinates: [ 41, 6 ] }},
+{"zone_name":"zone 3", "description":"a zone 3" ,"radius":5.6, "risk":1, loc: { type: "Point", coordinates: [ 42, 7 ] }}
 ]
