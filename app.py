@@ -28,6 +28,8 @@ def init_db():
     # Put a spatial index on the loc field
     with app.app_context():
         mongo.db.zones.ensure_index( [("loc",GEOSPHERE)] )
+        
+        mongo.db.zones.ensure_index()
 
 @app.route('/')
 def index():
@@ -193,8 +195,14 @@ def user_enter(zone_id):
     """ User enters a zone """
 
     # Create a fake user id
-    user_id = str(bson.objectid.ObjectId())
-
+    #user_id = str(bson.objectid.ObjectId())
+    #Hack for demo:
+    user_id = "1"
+    
+    # Hack
+    if mongo.db.users.find({'zone_id' : zone_id, 'user_id' : user_id,}).count() > 0:
+        mongo.db.users.remove()
+    
     doc = {'zone_id' : zone_id,
            'user_id' : user_id,
            'ts' : datetime.datetime.utcnow(),
@@ -207,7 +215,7 @@ def user_enter(zone_id):
 
 
 @app.route('/api/v1.0/exit/<string:zone_id>/<string:user_id>', methods=['GET'])
-def user_exit(zone_id, user_id):
+def user_exit(zone_id, user_id=None):
     """ User leaves a zone """
 
     res = mongo.db.users.update({'zone_id' : str(zone_id), 'user_id' : str(user_id) },
