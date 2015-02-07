@@ -1,8 +1,9 @@
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from flask import abort
 from flask import Response
 from pymongo import GEOSPHERE
+import json
 
 from flask.ext.pymongo import PyMongo
 from config import MONGO_DBNAME, MONGO_PORT
@@ -43,14 +44,15 @@ def getzones():
         rec = mongo.db.zones.find({'zone_name':data})
     else:
         rec = mongo.db.zones.find()
-
     for r in rec:
-        print 'found something'
+        r.pop('_id')
         out.append(r)
 
-    print "here"
+    jsonOut = json.dumps(out)
 
-    return jsonify(out)
+    return Response(response=jsonOut,
+                    status=200,
+                    mimetype="application/json")
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])
@@ -71,7 +73,7 @@ def create_zone():
     try:
         loc = content['loc']
         zone['loc'] = loc
-        
+
     except:
         return Response(status=405)
 
@@ -106,7 +108,7 @@ def create_zone():
 
     if len(str(zone_id)) == 24:
         response = {'zone_id' : str(zone_id) }
-        
+
     return jsonify(response), 201
 
 
