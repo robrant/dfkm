@@ -13,10 +13,14 @@ app.config['SECRET_KEY'] = 'secret!'
 
 # -----------------------------------------------------------------------------
 
+def init_db():
+    """ Placeholder for initialising the database"""
+    
+
 @app.route('/')
 def index():
     """ normal http request to a serve up the page """
-    return render_template('index.html')
+    return jsonify({"hello":"world"})
 
 
 
@@ -37,8 +41,6 @@ def getzones():
     return render_template('index.html')
 
 
-
-
 @app.route('/api/v1.0/zones', methods=['POST'])
 def create_zone():
 
@@ -51,13 +53,14 @@ def create_zone():
     zone = {
             'zone_name': request.json['zone_name'],
             'description': request.json.get('description', ""),
-            'loc' : loc,
+            'loc' : loc
+            
             #'risk' : PLACEHOLDER FOR GETTING THE RISK SCORE
-    }
+            }
 
     # Now push to mongo
-    
-    
+    zone_id = mongo.db.zones.insert(zone)
+    print zone_id
     #return jsonify({'zone_id': zone_id}), 201
 
 
