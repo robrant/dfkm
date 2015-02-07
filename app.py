@@ -28,19 +28,19 @@ def init_db():
     # Put a spatial index on the loc field
     with app.app_context():
         mongo.db.zones.ensure_index( [("loc",GEOSPHERE)] )
-        
+
         mongo.db.zones.ensure_index()
 
 @app.route('/')
 def index():
     """ normal http request to a serve up the page """
-    return jsonify({"hello":"world"})
+    return render_template('index.html')
 
 
 @app.route('/makezone')
 def makezone():
     """ normal http request to a serve up the page """
-    return render_template('index.html')
+    return render_template('index_make.html')
 
 def lltojson(jsonStr):
     #LatLng(49.2219, -15.97851),LatLng(53.18365, -15.97851),LatLng(53.18365, -3.49805),LatLng(49.2219, -3.49805)
@@ -198,11 +198,11 @@ def user_enter(zone_id):
     #user_id = str(bson.objectid.ObjectId())
     #Hack for demo:
     user_id = "1"
-    
+
     # Hack
     if mongo.db.users.find({'zone_id' : zone_id, 'user_id' : user_id,}).count() > 0:
         mongo.db.users.remove()
-    
+
     doc = {'zone_id' : zone_id,
            'user_id' : user_id,
            'ts' : datetime.datetime.utcnow(),
