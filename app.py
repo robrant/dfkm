@@ -42,7 +42,15 @@ def makezone():
     """ normal http request to a serve up the page """
     return render_template('index.html')
 
-
+def lltojson(jsonStr):
+    #LatLng(49.2219, -15.97851),LatLng(53.18365, -15.97851),LatLng(53.18365, -3.49805),LatLng(49.2219, -3.49805)
+    #{ "type" : "Point", "coordinates" : [ -0.198857, 51.5133314 ] }
+    coords = jsonStr.replace("LatLng", '').split('),')
+    outCoords = []
+    for i in coords:
+        outCoords.append(i.lstrip('(').split(','))
+    outJson = [{"type" : "Polygon", "coordinates" : outCoords}]
+    return outJson
 
 def updateRisk():
     #Get the zones
@@ -145,23 +153,23 @@ def create_zone():
 @app.route('/api/v1.0/user_count/<string:zone_id>', methods=['GET'])
 def users_in_zone(zone_id):
     """ Number of users in a zone """
-    
+
     # Create a fake user id
     user_id = str(bson.objectid.ObjectId())
     doc = {'zone_id': str(zone_id),
            'active' : True}
-    
+
     number_users = mongo.db.users.find(doc).count()
-    
+
     response = {'zone_id' : str(zone_id),
                 'user_count' : number_users }
-    
+
     return jsonify(response), 201
 
 @app.route('/api/v1.0/enter/<string:zone_id>', methods=['GET'])
 def user_enter(zone_id):
     """ User enters a zone """
-    
+
     # Create a fake user id
     #user_id = str(bson.objectid.ObjectId())
     #Hack for demo:
@@ -175,7 +183,7 @@ def user_enter(zone_id):
            'user_id' : user_id,
            'ts' : datetime.datetime.utcnow(),
            'active' : True }
-    
+
     res = mongo.db.users.insert(doc)
     response = {'user_id':str(user_id)}
 
@@ -188,7 +196,7 @@ def user_exit(zone_id, user_id=None):
 
     res = mongo.db.users.update({'zone_id' : str(zone_id), 'user_id' : str(user_id) },
                                 {'$set' : {'active' : False }})
-    
+
     return jsonify({'updated': True}), 201
 
 if __name__ == '__main__':
