@@ -1,5 +1,6 @@
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+import json
 
 app = Flask(__name__)
 
@@ -16,7 +17,16 @@ app.config['SECRET_KEY'] = 'secret!'
 
 @app.route('/')
 def index():
-    """ normal http request to a serve up the page """  
+    """ normal http request to a serve up the page """
+    return render_template('index.html')
+
+
+
+@app.route('/api/v1.0/getzones')
+def getzones():
+    """ Grabbing and returning the zones """
+    data = request.args.get('zid', None)
+    print data
     return render_template('index.html')
 
 
