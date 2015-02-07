@@ -90,7 +90,7 @@ def getzones():
                     mimetype="application/json")
 
 
-@app.route('/api/v1.0/zones', methods=['POST'])
+@app.route('/api/v1.0/zones/', methods=['POST'])
 def create_zone():
 
     # Setup a zone object to insert
