@@ -14,8 +14,18 @@ app.config['SECRET_KEY'] = 'secret!'
 
 @app.route('/')
 def index():
-    """ normal http request to a serve up the page """  
-    return jsonify({"hello":"world"})
+    """ normal http request to a serve up the page """
+    return render_template('index.html')
+
+
+
+@app.route('/api/v1.0/getzones')
+def getzones():
+    """ Grabbing and returning the zones """
+    data = request.args.get('zid', None)
+    print data
+    return render_template('index.html')
+
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])
