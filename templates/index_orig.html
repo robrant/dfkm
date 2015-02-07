@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Data Teams</title>
+
+    <!-- Make me responsive! -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/bootstrap3/css/bootstrap.css" rel="stylesheet">
+    <!--link href="/static/bootstrap3/css/bootstrap-responsive.css" rel="stylesheet">-->
+
+	<!-- CSS -->
+    <link rel="stylesheet" href="../static/bootstrap3/css/bootstrap.min.css">
+
+    <!-- JAVASCRIPT LIBS -->
+    <script type="text/javascript" src="../static/js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../static/bootstrap3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../static/js/d3.min.js"></script>
+    <script type="text/javascript" src="../static/js/d3.js"></script>
+    <!--D3 Chart Style-->
+	<style>
+			.axis path,
+			.axis line {
+			  fill: none;
+			  stroke: #000;
+			  shape-rendering: crispEdges;
+			}
+			.x.axis line {
+						  stroke: lightgrey;
+						}
+			.line {
+			  fill: none;
+			  stroke: steelblue;
+			  stroke-width: 1.5px;
+			}
+
+			.page-header {
+			  width:60%;
+			  height:40px;
+			  <!--background-image:url('/static/pics/geni_copy2.jpg');-->
+			  background-size:cover;
+			  margin: 0 0 18px;
+			  margin-left: 18px;
+			}
+
+			.top-buffer { margin-top:10px;
+						  margin-left:5px;
+						 }
+
+			.scrollable-menu {
+			    height: auto;
+			    max-height: 100px;
+			    overflow-x: hidden;
+			}
+	</style>
+
+
+</head>
+
+<body>
+
+	<div class="page-header">
+  		<h1>$>Data Science Skills<small>   $suitableTagLine</small></h1>
+	</div>
+
+	<div class="container-fluid" id="outerContainer">
+		<div class="row-fluid nopadding">
+			<!--<div class="span2"><img src="../static/images/tesco-logo.jpg" alt="Tesco" style="padding:10px 10px; height:50px"></div>-->
+			<div class="span5"><!-- container column 1 -->
+				<div class="panel panel-default">
+			  		<div class="panel-heading" id="gd"><i class="icon-ok">Distribute Your Skill Points - Max 100</i></div>
+			  			<div class="panel-body">
+			  			  <div class="row-fluid"> <!-- First Row -->
+							<div class="col-xs-4">
+								<div class="form-group has-feedback">
+									<div class="row top-buffer">
+										<select class="form-control" id="personSelect">
+										  {% for x in names %}
+											<option>{{ x }}</option>
+										  {% endfor %}
+										</select>
+										<script>
+											//Name Changed
+											$( "#personSelect" ).change(function() {
+												//Get the data for selected person
+											  	var person = $( "#personSelect" ).val();
+											  	//console.log(person);
+											  	$.ajax({
+											  			url: "/persondata?person="+person,
+											  			dataType: "json"
+											  	}).done(function(data) {
+											  			//console.log(data);
+											  			//$( '#nameVal' ).val(data['name']);
+														$( '#visVal' ).val(data['Vis']);
+														$( '#statsVal' ).val(data['Stats']);
+														$( '#codingVal' ).val(data['Coding']);
+														$( '#commsVal' ).val(data['Comms']);
+														$( '#domVal' ).val(data['Domain Exp']);
+														graphAlter();
+														$( "#totPts" ).html("Points: "+calcPts());
+											  			})
+											  	  .fail(function() {console.log("Get Person error"); })
+											  	  .always(function() {console.log("always complete"); });
+											});
+										</script>
+									</div>
+									<div class="row top-buffer">
+									    <label class="control-label">Visualisation</label>
+									    <input type="number" class="form-control input-sm" id="visVal" />
+									    <script>
+										    $( "#visVal" ).change(function() {
+												//$( "#totPts" ).html("Points: "+calcPts());
+												calcPts();
+												//Parse the data into a format graph understands
+												var dataStr = '[' +
+												'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+												'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+												'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+												'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+												'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+												graphAlter(dataStr);
+											});
+										</script>
+									    <!-- <i class="glyphicon glyphicon-eye-open form-control-feedback"></i> -->
+									</div>
+									<div class="row top-buffer">
+									    <label class="control-label">Statistics</label>
+									    <input type="number" class="form-control input-sm" id="statsVal" />
+									    <script>
+										    $( "#statsVal" ).change(function() {
+												//$( "#totPts" ).html("Points Left: "+calcPts());
+												calcPts();
+												//Parse the data into a format graph understands
+												var dataStr = '[' +
+												'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+												'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+												'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+												'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+												'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+												graphAlter(dataStr);
+											});
+										</script>
+									    <!-- <i class="glyphicon glyphicon-stats form-control-feedback"></i> -->
+									</div>
+									<div class="row top-buffer">
+									    <label class="control-label">Coding</label>
+									    <input type="number" class="form-control input-sm" id="codingVal" />
+									    <script>
+									    	$( "#codingVal" ).change(function() {
+												//$( "#totPts" ).html("Points Left: "+calcPts());
+												calcPts();
+												//Parse the data into a format graph understands
+												var dataStr = '[' +
+												'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+												'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+												'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+												'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+												'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+												graphAlter(dataStr);
+											});
+									    </script>
+									    <!-- <i class="glyphicon glyphicon-play form-control-feedback"></i> -->
+									</div>
+									<div class="row top-buffer">
+									    <label class="control-label">Communication</label>
+									    <input type="number" class="form-control input-sm" id="commsVal" />
+									    <script>
+										    $( "#commsVal" ).change(function() {
+												//$( "#totPts" ).html("Points Left: "+calcPts());
+												calcPts();
+												//Parse the data into a format graph understands
+												var dataStr = '[' +
+												'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+												'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+												'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+												'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+												'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+												graphAlter(dataStr);
+											});
+									    </script>
+									    <!-- <i class="glyphicon glyphicon-bullhorn form-control-feedback"></i> -->
+									</div>
+									<div class="row top-buffer">
+									    <label class="control-label">Domain Knowledge</label>
+									    <input type="number" class="form-control input-sm" id="domVal" />
+									    <script>
+										    $( "#domVal" ).change(function() {
+												//$( "#totPts" ).html("Points Left: "+calcPts());
+												calcPts();
+												//Parse the data into a format graph understands
+												var dataStr = '[' +
+												'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+												'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+												'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+												'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+												'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+												graphAlter(dataStr);
+											});
+										</script>
+									    <!-- <i class="glyphicon glyphicon-book form-control-feedback"></i> -->
+									</div>
+
+									<div class="btn-group">
+										<div class="row top-buffer">
+											<button class="btn btn-success" data-toggle="popover" id="store">Store</button>
+											<script>
+												$( '#store' ).click(function() {
+													dat = [$( "#visVal" ).val(),
+															$( "#statsVal" ).val(),
+															$( "#codingVal" ).val(),
+															$( "#commsVal" ).val(),
+															$( "#domVal" ).val(),
+															$( "#personSelect" ).val()];
+													$.ajax({
+														url: "/store?stats="+dat,
+														dataType: "json"
+													}).done(function(data) {
+															//Build the graph as a callback
+															//console.log("Store Done");
+															})
+													  .fail(function() {console.log("Store error"); })
+													  .always(function() {
+													  		d3.select("#stackedChart").remove();
+											    			setTimeout(addStackedGraph(), 50);
+															 });
+													$( '#store' ).html("Stored")
+													setTimeout(function() {
+													      $( '#store' ).html("Store")
+													}, 2000);
+												});
+
+											</script>
+											<button class="btn btn-warn" data-toggle="popover" id="totPts" disabled>100</button>
+										</div>
+									</div>
+								</div> <!--Close Form  -->
+							</div> <!-- Close Span -->
+						<div class="col-md-8 nopadding">
+							<h2 class="text-center"></h2>
+							<div id="chart1"></div>
+							    	<script>
+								    	$( document ).ready(function() {
+											// Handler for .ready() called.
+											//Delay the call to thix function to ensure ajax returns
+											//console.log("doc ready");
+											setTimeout(renderChart1, 500);
+											//Get the data for selected person
+										  	var person = $( "#personSelect" ).val();
+										  	//console.log(person);
+											$.get( "/persondata?person="+person, function( data ) {
+												//alert( "Data Loaded: " + data['name'] );
+												//$( '#nameVal' ).val(data['name']);
+												$( '#visVal' ).val(data['Vis']);
+												$( '#statsVal' ).val(data['Stats']);
+												$( '#codingVal' ).val(data['Coding']);
+												$( '#commsVal' ).val(data['Comms']);
+												$( '#domVal' ).val(data['Domain Exp']);
+											});
+
+										});
+							    	</script>
+							   	</div> <!-- Close graph column -->
+							  </div> <!-- Close second row (graph) -->
+							</div><!-- Close Panel Body -->
+						</div><!-- Close Panel -->
+					</div><!-- Close Container Column 1 -->
+			<div class="span7"><!-- Open container column 2 -->
+				<div class="panel panel-default">
+			  		<div class="panel-heading">Team Skills</div>
+			  			<div class="panel-body">
+			  				<div class="span2"> <!-- First sub column -->
+				  				<div class="btn-group" data-toggle="buttons">
+				  				{% for name in names %}
+					  				<div class="row top-buffer">
+											  <label class="btn btn-primary">
+											    <input type="checkbox" id="{{ name }}Chk" checked> {{ name }}
+											    <script>
+											    	//On Change - alter stacked graph
+											    	$( "#{{ name }}Chk" ).change(function() {
+											    		d3.select("#stackedChart").remove();
+											    		setTimeout(addStackedGraph(), 50);
+											    	});
+											    </script>
+											  </label>
+										</div>
+  								{% endfor %}
+								</div>
+			  				</div> <!-- Close first sub column -->
+			  			<div class="span7"> <!-- Second sub column - graph -->
+			  			<div id="chart2"></div>
+			  				<script>
+								$( document ).ready(function() {
+									addStackedGraph();
+								});
+							</script>
+						</div> <!-- Close second sub column - graph column -->
+			  			</div> <!-- Close Panel Body -->
+			  	</div><!-- Close Panel -->
+	     	</div>  <!--close container column 2-->
+	    </div> <!-- Close the main row -->
+
+<script><!-- Some js components move down -->>
+	//Alters the person graph when things changed
+	function graphAlter(){
+	//Parse the data into a format graph understands
+		var dataStr = '[' +
+			'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+			'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+			'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+			'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+			'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+		//console.log(dataStr);
+		var data = JSON.parse(dataStr);
+
+		//Copied functions and vars for d3
+		//Vars
+		var barHeight = 63; // height of one bar
+		var maxBarWidth = 300; // width of the bar with the max value
+
+		// scales
+		var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+		var y = function(d, i) { return yScale(i); };
+		var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+		var x = d3.scale.linear().domain([0, 100]).range([0, maxBarWidth]);
+
+		// accessor functions
+		var barLabel = function(d) { return d['skill']; };
+		var barValue = function(d) { return parseFloat(d['points']); };
+		var barColour = function(d) { return d['colour'];};
+
+		//Do the Transition
+		var svg = d3.select("#chart1");
+		//Bars
+		var bars = svg.selectAll("rect").data(data)
+			.transition()
+			.duration(1250)
+			.attr('y', y)
+		  	.attr('height', yScale.rangeBand())
+		  	.attr('width', function(d) { return x(barValue(d)); })
+		  	.attr('stroke', 'white')
+		  	//.attr('fill', 'steelblue')
+		  	.attr('fill', function(d) { return barColour(d); });
+
+	};
+</script>
+
+<script>
+	function addStackedGraph() {
+
+		var names = new Array();
+		//Gather info on the checked elements
+		{% for name in names %}
+
+			if ( $( "#{{ name }}Chk" ).is(':checked') ) {
+				names.push("{{ name }}");
+			}
+
+		{% endfor %}
+
+
+		if ( $( "#tomChk" ).is(':checked') ) {
+			//console.log("tom On");
+			names.push("Tom");
+		}
+
+		if ( $( "#helenChk" ).is(':checked') ) {
+			//console.log("helen On");
+			names.push("Helen");
+		}
+
+		if ( $( "#jillChk" ).is(':checked') ) {
+			//console.log("helen On");
+			names.push("Jill");
+		}
+
+		if ( $( "#peterChk" ).is(':checked') ) {
+			//console.log("helen On");
+			names.push("Peter");
+		}
+
+		//console.log(names);
+
+		//Get the data for checked persons
+		$.ajax({
+				url: "/teamdata?team="+names,
+				dataType: "json"
+		}).done(function(data) {
+				//Build the graph as a callback
+				//console.log("return json follows");
+				buildStackedGraph(data);
+				})
+		  .fail(function() {console.log("Get Team error"); })
+		  .always(function() {console.log("team ajax always complete"); });
+
+		//console.log(graphData);
+
+	};
+
+	function buildStackedGraph(inData){
+
+		var data = inData;
+
+		var margin = {top: 20, right: 20, bottom: 30, left: 40},
+		    width = 480 - margin.left - margin.right,
+		    height = 650 - margin.top - margin.bottom;
+
+		//Size Vars
+		var valueLabelWidth = 30; // space reserved for value labels (right)
+		var barWidth = 53; // height of one bar
+		var barLabelWidth = 10; // space reserved for bar labels
+		var barLabelPadding = 5; // padding between bar and bar labels (left)
+		var gridLabelHeight = 0; // space reserved for gridline labels
+		var gridChartOffset = 3; // space between start of grid and first bar
+
+
+		//Scales
+		var xScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barWidth]);
+
+		var x = d3.scale.ordinal()
+		    .rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		    .rangeRound([height, 0]);
+
+	    var p=d3.scale.category10();
+		var r=p.range();
+
+		var color = d3.scale.ordinal()
+		    //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+		    .range(r);
+
+		var xAxis = d3.svg.axis()
+		    .scale(x)
+		    .orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		    .scale(y)
+		    .orient("left")
+		    .ticks(0)
+		    //.tickFormat(d3.format(".2s"));
+
+		var svg = d3.select("#chart2").append("svg")
+			.attr("id","stackedChart")
+		    .attr("width", width + margin.left + margin.right)
+		    .attr("height", height + margin.top + margin.bottom)
+		  .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		//Make colour domain
+		color.domain(d3.keys(data[0]).filter(function(key) { return key !== "skill"; }));
+
+		  data.forEach(function (d) {
+			    d.skill = d.skill;
+			    d.tom = +d.tom;
+			    d.peter = +d.peter;
+			    d.jill = +d.jill;
+			    d.helen = +d.helen;
+			});
+
+
+			data.forEach(function (d) {
+			    var y0 = 0;
+			    d.types = color.domain().map(function (name) {
+			        return {
+			            name: name,
+			            y0: y0,
+			            y1: y0 += +d[name]
+			        };
+			    });
+			    d.total = d.types[d.types.length - 1].y1;
+			    //console.log(d);
+			});
+
+		  x.domain(data.map(function(d) { return d.skill; }));
+		  y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+		  //Make Axes
+		  svg.append("g")
+		      .attr("class", "x axis")
+		      .attr("transform", "translate(0," + height + ")")
+		      .call(xAxis);
+
+		  svg.append("g")
+		      .attr("class", "y axis")
+		      .call(yAxis)
+		    .append("text")
+		      .attr("transform", "rotate(-90)")
+		      .attr("y", 6)
+		      .attr("dy", ".71em")
+		      .style("text-anchor", "end")
+		      //.text("Population");
+
+		  //Bars
+		  var skill = svg.selectAll(".skill")
+		      .data(data)
+		    .enter().append("g")
+		      .attr("class", "g")
+		      .attr("transform", function(d) { return "translate(" + x(d.skill) + ",0)"; })
+
+		  skill.selectAll("rect")
+		      .data(function(d) { return d.types; })
+		    .enter().append("rect")
+		      .attr("width", xScale.rangeBand())
+		      .attr("y", function(d) { return y(d.y1); })
+		      .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+		      .style("fill", function(d) { return color(d.name); });
+
+		  //Legend
+		  var legend = svg.selectAll(".legend")
+		      .data(color.domain().slice().reverse())
+		    .enter().append("g")
+		      .attr("class", "legend")
+		      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+		  legend.append("rect")
+		      .attr("x", width - 18)
+		      .attr("width", 18)
+		      .attr("height", 18)
+		      .style("fill", color);
+
+		  legend.append("text")
+		      .attr("x", width - 24)
+		      .attr("y", 9)
+		      .attr("dy", ".35em")
+		      .style("text-anchor", "end")
+		      .text(function(d) { return d; });
+	};
+</script>
+
+<script><!-- Alter for stacked graph -->>
+	//Alters the stacked graph when things changed
+	function stackedGraphAlter(){
+		var data = {{ teamOutput2|safe }};
+		var margin = {top: 20, right: 20, bottom: 30, left: 40},
+		    width = 480 - margin.left - margin.right,
+		    height = 450 - margin.top - margin.bottom;
+
+		//Size Vars
+		var valueLabelWidth = 30; // space reserved for value labels (right)
+		var barWidth = 53; // height of one bar
+		var barLabelWidth = 10; // space reserved for bar labels
+		var barLabelPadding = 5; // padding between bar and bar labels (left)
+		var gridLabelHeight = 0; // space reserved for gridline labels
+		var gridChartOffset = 3; // space between start of grid and first bar
+
+
+		//Scales
+		var xScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barWidth]);
+
+		var x = d3.scale.ordinal()
+		    .rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		    .rangeRound([height, 0]);
+
+		var color = d3.scale.ordinal()
+		    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+		var xAxis = d3.svg.axis()
+		    .scale(x)
+		    .orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		    .scale(y)
+		    .orient("left")
+		    .ticks(0)
+		    //.tickFormat(d3.format(".2s"));
+
+		//var svg = d3.select("#chart2").append("svg")
+		//    .attr("width", width + margin.left + margin.right)
+		//    .attr("height", height + margin.top + margin.bottom)
+		//  .append("g")
+		//    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		//Make colour domain
+		color.domain(d3.keys(data[0]).filter(function(key) { return key !== "skill"; }));
+
+	  data.forEach(function (d) {
+		    d.skill = d.skill;
+		    d.tom = +d.tom;
+		    d.peter = +d.peter;
+		    d.jill = +d.jill;
+		    d.helen = +d.helen;
+		});
+
+
+		data.forEach(function (d) {
+		    var y0 = 0;
+		    d.types = color.domain().map(function (name) {
+		        return {
+		            name: name,
+		            y0: y0,
+		            y1: y0 += +d[name]
+		        };
+		    });
+		    d.total = d.types[d.types.length - 1].y1;
+		    //console.log(d);
+		});
+
+		  x.domain(data.map(function(d) { return d.skill; }));
+		  y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+
+		//Do the Transition
+		var svg = d3.select("#chart2");
+		//console.log(data);
+		//console.log(skill);
+
+		//Remove all bars
+		svg.selectAll("skill.rect").remove()
+
+		//Re add
+		  var skill = svg.selectAll(".skill")
+		      .data(data)
+		    .enter().append("g")
+		      .attr("class", "g")
+		      .attr("transform", function(d) { return "translate(" + x(d.skill) + ",0)"; })
+
+		  skill.selectAll("rect")
+		      .data(function(d) { return d.types; })
+		    .enter().append("rect")
+		      .attr("width", xScale.rangeBand())
+		      .attr("y", function(d) { return y(d.y1); })
+		      .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+		      .style("fill", function(d) { return color(d.name); });
+
+		//var bars = skill.selectAll("rect")
+
+		//skill.selectAll("rect")
+		//      .data(function(d) { return d.types; })
+		//     .transition()
+		//      .duration(500)
+		//      .attr("width", xScale.rangeBand())
+		//      .attr("y", function(d) { return y(d.y1); })
+		//      //.attr("height", function(d) { return y(d.y0) - y(d.y1); })
+		//      .attr("height", 10)
+		//      .style("fill", function(d) { return color(d.name); });
+
+		//console.log("End transition stacked");
+
+	};
+</script>
+
+
+
+<script>
+	//Works out the number of points left - returns number
+	function calcPts() {
+		var vis = parseInt($( "#visVal" ).val());
+		var stats = parseInt($( "#statsVal" ).val());
+		var coding = parseInt($( "#codingVal" ).val());
+		var comms = parseInt($( "#commsVal" ).val());
+		var dom = parseInt($( "#domVal" ).val());
+		var out = 100-(vis+stats+coding+comms+dom);
+		//console.log(out);
+		$( "#totPts" ).html("Points:"+out);
+
+		if (vis < 0) {
+			$( "#store" ).prop("disabled",true);
+		}
+		else if (stats < 0) {
+			$( "#store" ).prop("disabled",true);
+		}
+		else if (coding < 0) {
+			$( "#store" ).prop("disabled",true);
+		}
+		else if (comms < 0) {
+			$( "#store" ).prop("disabled",true);
+		}
+		else if (dom < 0) {
+			$( "#store" ).prop("disabled",true);
+		} else if (out == 0) {
+			$( "#store" ).prop("disabled",false);
+		} else {
+			$( "#store" ).prop("disabled",true);
+		}
+		return out;
+	};
+</script>
+
+<script>
+	//Builds main chart - initial build
+	  function renderChart1() {
+
+		//var data = {{ allOutput|safe }};
+		//var data = '';
+
+		//Get the data from the boxes
+			var dataStr = '[' +
+					'{ "skill":"Vis" , "points":'+$( "#visVal" ).val()+', "colour":"red" },' +
+					'{ "skill":"Stats" , "points":'+$( "#statsVal" ).val()+', "colour":"green" },' +
+					'{ "skill":"Coding" , "points":'+$( "#codingVal" ).val()+', "colour":"yellow" },' +
+					'{ "skill":"Comms" , "points":'+$( "#commsVal" ).val()+', "colour":"blue" },' +
+					'{ "skill":"Domain Exp" , "points":'+$( "#domVal" ).val()+', "colour":"purple" } ]';
+			//console.log(dataStr);
+      		var data = JSON.parse(dataStr);
+
+
+
+
+
+		//Work out the remaining points & change accordingly
+		$( "#totPts" ).val(calcPts());
+
+		//Construct Graph
+
+		var valueLabelWidth = 30; // space reserved for value labels (right)
+		var barHeight = 63; // height of one bar
+		var barLabelWidth = 10; // space reserved for bar labels
+		var barLabelPadding = 5; // padding between bar and bar labels (left)
+		var gridLabelHeight = 45; // space reserved for gridline labels
+		var gridChartOffset = 3; // space between start of grid and first bar
+		var maxBarWidth = 300; // width of the bar with the max value
+
+		// accessor functions
+		var barLabel = function(d) { return d['skill']; };
+		var barValue = function(d) { return parseFloat(d['points']); };
+		var barColour = function(d) { return d['colour'];};
+
+		// sorting
+		//var sortedData = data.sort(function(a, b) {
+		// return d3.descending(barValue(a), barValue(b));
+		//});
+
+		// scales
+		var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+		var y = function(d, i) { return yScale(i); };
+		var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+		var x = d3.scale.linear().domain([0, 100]).range([0, maxBarWidth]);
+
+		// svg container element
+		var chart = d3.select('#chart1').append("svg")
+		  .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+		  .attr('height', gridLabelHeight + gridChartOffset + data.length * barHeight);
+
+		// grid line labels
+		var gridContainer = chart.append('g')
+		  .attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
+		//gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
+		//  .attr("x", x)
+		//  .attr("dy", -3)
+		//  .attr("text-anchor", "middle")
+		//  .text(String);
+
+		// vertical grid lines
+		gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
+		  .attr("x1", x)
+		  .attr("x2", x)
+		  .attr("y1", 0)
+		  .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+		  .style("stroke", "#ccc");
+
+		// bar labels
+		//var labelsContainer = chart.append('g')
+		//  .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
+		//labelsContainer.selectAll('text').data(data).enter().append('text')
+		//  .attr('y', yText)
+		//  .attr('stroke', 'none')
+		//  .attr('fill', 'black')
+		//  .attr("dy", ".35em") // vertical-align: middle
+		//  .attr('text-anchor', 'end')
+		//  .text(barLabel);
+
+		// bars
+		var barsContainer = chart.append('g')
+		  .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
+		barsContainer.selectAll("rect").data(data).enter().append("rect")
+		  .attr('y', y)
+		  .attr('height', yScale.rangeBand())
+		  .attr('width', function(d) { return x(barValue(d)); })
+		  .attr('stroke', 'white')
+		  .style("opacity", .7)
+		  //.attr('fill', 'steelblue');
+		  .attr('fill', function(d) { return barColour(d); });
+
+		// bar value labels - REMOVED FOR TRANSITION EASE
+		//barsContainer.selectAll("text").data(data).enter().append("text")
+		//  .attr("x", function(d) { return x(barValue(d)); })
+		//  .attr("y", yText)
+		// .attr("dx", 3) // padding-left
+		//  .attr("dy", ".35em") // vertical-align: middle
+		//  .attr("text-anchor", "start") // text-align: right
+		//  .attr("fill", "black")
+		//  .attr("stroke", "none")
+		//  .text(function(d) { return d3.round(barValue(d), 2); });
+		// start line
+		barsContainer.append("line")
+		  .attr("y1", -gridChartOffset)
+		  .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+		  .style("stroke", "#000");
+
+		}
+</script>
+<script>
+	//Onload Scripts
+
+	//var skillsVals = {{ skills|safe }};
+
+	//$( "#visVal" ).val(skillsVals['Vis']);
+	//$( "#statsVal" ).val(skillsVals['Stats']);
+	//$( "#codingVal" ).val(skillsVals['Coding']);
+	//$( "#commsVal" ).val(skillsVals['Comms']);
+	//$( "#domVal" ).val(skillsVals['Domain Exp']);
+
+	//On change functions - needs checking for low numbers
+
+</script>
+
+
+</body>
+
+</html>

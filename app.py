@@ -31,6 +31,13 @@ def index():
     return jsonify({"hello":"world"})
 
 
+@app.route('/makezone')
+def makezone():
+    """ normal http request to a serve up the page """
+    return render_template('index.html')
+
+
+
 def updateRisk():
     #Get the zones
     rec = mongo.db.zones.find()
@@ -96,11 +103,11 @@ def create_zone():
     # HANDLE POINT DATA
     if loc['type'].lower() == 'point' and content.has_key('radius') == True:
         zone['radius'] = content['radius']
-    
+
     # HANDLE POLYGON DATA
     if loc['type'].lower() == 'polygon':
         zone['loc'] = loc
-    
+
     # Default on the risk score
     if content.has_key('risk') == True:
         zone['risk'] = content['risk']
