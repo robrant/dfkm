@@ -26,10 +26,26 @@ def index():
     return jsonify({"hello":"world"})
 
 
+def updateRisk():
+    #Get the zones
+    rec = mongo.db.zones.find()
+    for r in rec:
+        #do a geo within query for the accidents data
+        coords = r['loc']['coordinates']
+        #Radius of earth in meters - to convert to radians for mongo
+        radius = r['radius']/6378100
+        numAcc = mongo.db.accidents.find( {'geometry': { '$geoWithin': { '$centerSphere': [ coords, radius ] } }} ).count()
+        upd = mongo.db.zones.update({'_id':r['_id']}, {'$set': {"risk": numAcc}})
+        print upd, numAcc, radius
+    print 'updated'
+
 
 @app.route('/api/v1.0/getzones', methods=['GET'])
 def getzones():
     """ Grabbing and returning the zones """
+
+    #Update the risk vals
+    updateRisk()
 
     data = request.args.get('zone_name', None)
     print data
