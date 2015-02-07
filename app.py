@@ -3,9 +3,10 @@ from flask import Flask, render_template, jsonify, request
 from flask import abort
 
 from flask.ext.pymongo import PyMongo
+from config import MONGO_DBNAME, MONGO_PORT
 
 app = Flask(__name__)
-mongo = PyMongo(app)
+mongo = PyMongo(app, config_prefix='MONGO')
 
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
@@ -54,9 +55,9 @@ def create_zone():
     }
 
     # Now push to mongo
-
-
-    return jsonify({'zone_id': zone_id}), 201
+    
+    
+    #return jsonify({'zone_id': zone_id}), 201
 
 
 if __name__ == '__main__':
@@ -64,4 +65,4 @@ if __name__ == '__main__':
     Run the server
     """
 
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
