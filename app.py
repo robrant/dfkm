@@ -21,7 +21,20 @@ def getzones():
     """ Grabbing and returning the zones """
     data = request.args.get('zid', None)
     print data
+    rec = mongo.db.people.update({'name':d['name']},
+                                  {'$set': { 'Vis':int(data[0]),
+                                            'Stats':int(data[1]),
+                                            'Coding':int(data[2]),
+                                            'Comms':int(data[3]),
+                                            'Domain Exp':int(data[4])}})
+
+
+
     return render_template('index.html')
+
+
+
+
 
 
 
