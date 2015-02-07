@@ -90,6 +90,30 @@ def getzones():
                     mimetype="application/json")
 
 
+@app.route('/api/v1.0/getgeo', methods=['GET'])
+def getgeo():
+    """ Grabbing and returning the zones """
+
+    data = request.args.get('zone_name', None)
+    print data
+    #Check if data is null - get all zones
+    out = []
+    if data:
+        rec = mongo.db.zones.find({'zone_name':data})
+    else:
+        rec = mongo.db.zones.find()
+    for r in rec:
+        r.pop('_id')
+        out.append(r['loc'])
+
+    jsonOut = json.dumps(out)
+    print jsonOut
+
+    return Response(response=jsonOut,
+                    status=200,
+                    mimetype="application/json")
+
+
 @app.route('/api/v1.0/zones/', methods=['POST'])
 def create_zone():
 

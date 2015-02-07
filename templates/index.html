@@ -109,6 +109,12 @@
                                     var newW = newW + "px";
                                     $('#map').css('width', newW);
                                     var map = L.map('map', {drawControl: true}).setView([48.505, 3.0], 3);
+                                    $.getJSON('/api/v1.0/getgeo',function(result){
+                                    	$.each(result, function( index ) {
+                                    		console.log(index);
+                                    		L.geoJson(index).addTo(map);
+                                    	});
+							        });
                                     L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
                                         maxZoom: 18,
                                         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -117,20 +123,7 @@
                                         id: 'examples.map-i875mjb7'
                                     }).addTo(map);
 
-                                    map.on('moveend', function() {
-                                        var b = map.getBounds().toBBoxString();
-                                        //Fire the bounds to the graph processor
-                                        $.ajax({
-                                            url: "/data?bounds="+b,
-                                            dataType: "json"
-                                        }).done(function(data) {
-                                            //Build the graph as a callback
-                                            d3.select("#streamgraph").remove();
-                                            chart(data, "pink");
-                                            })
-                                      .fail(function() {console.log("Get data error"); })
-                                      .always(function() { });
-                                    });
+
 
 
                                     // Initialise the FeatureGroup to store editable layers
@@ -158,17 +151,17 @@
 									    console.log("marker add");
 									    coords = layer.getLatLngs();
 									    console.log(coords.toString());
-									    $.ajax({
-									    	type: "POST",
-                                            url: "/api/v1.0/zones",
-                                            data: coords,
-                                            //dataType: "json"
-                                        }).done(function(data) {
-                                            //Build the graph as a callback
-											console.log("done here");
-                                            })
-                                      .fail(function() {console.log("Get data error"); })
-                                      .always(function() { });
+									    //$.ajax({
+									    //	type: "POST",
+                                        //    url: "/api/v1.0/zones",
+                                        //    data: coords,
+                                        //    //dataType: "json"
+                                        //}).done(function(data) {
+                                        //    //Build the graph as a callback
+										//	console.log("done here");
+                                        //    })
+                                      //.fail(function() {console.log("Get data error"); })
+                                      //.always(function() { });
 									});
 
 
