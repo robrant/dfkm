@@ -1,11 +1,12 @@
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from flask import abort
+import json
 
 from flask.ext.pymongo import PyMongo
 from config import MONGO_DBNAME, MONGO_PORT
 
-app = Flask(__name__)
+app = Flask('dfkm')
 mongo = PyMongo(app, config_prefix='MONGO')
 
 app.debug = True
@@ -31,14 +32,15 @@ def getzones():
         rec = mongo.db.zones.find({'zone_name':data})
     else:
         rec = mongo.db.zones.find()
-
     for r in rec:
-        print 'found something'
+        r.pop('_id')
         out.append(r)
 
-    print "here"
+    jsonOut = json.dumps(out)
 
-    return jsonify(out)
+    return Response(response=jsonOut,
+                    status=200,
+                    mimetype="application/json")
 
 
 @app.route('/api/v1.0/zones', methods=['POST'])
