@@ -48,7 +48,25 @@ class FlaskrTestCase(unittest.TestCase):
         coll = db['zones']
         res = coll.count()
         assert res == 1
-        
 
+    def test_GET_simple_point(self):
+        
+        data = {'zone_name' : 'test zone',
+                'description' : 'new dangerous zone',
+                'loc' : {'type' : 'Point',
+                         'coordinates': [ 40, 5 ]},
+                'radius': 10,
+                }
+        
+        data = json.dumps(data)
+        
+        res = self.app.post('/api/v1.0/zones',
+                             data=data,
+                             content_type='application/json')
+        
+        response = self.app.get('/api/v1.0/getzones')
+        for x in response:
+            print x
+        
 if __name__ == '__main__':
     unittest.main()
