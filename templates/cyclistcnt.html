@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title>DFKM</title>
+	<style type="text/css">
+		.text{
+			text-align: center;
+			font-size: xx-large;
+		}
+		
+	</style>
+</head>
+<body>
+	<div class="text">
+	Cyclists currently in zone:<br />
+	<span id="count">0</span>
+	</div>
+	<script>
+	var req = new XMLHttpRequest();
+	req.onreadystatechange = function() {
+		if (req.readyState === 4) {
+			var response = req.responseText;
+			var json = JSON.parse(response);
+
+			var span = document.getElementById("count"),
+				text = document.createTextNode(json['user_count']);
+			span.innerHTML = ''; // clear existing
+			span.appendChild(text);
+		}
+	};
+
+	req.open('GET', 'http://ec2-54-77-57-184.eu-west-1.compute.amazonaws.com:5000/api/v1.0/user_count/54d63724f5ccb1100d633870');
+	req.send(null);
+	
+	setTimeout(function(){
+	   window.location.reload(1);
+	}, 5000);
+	</script>
+</body>
+</html>
